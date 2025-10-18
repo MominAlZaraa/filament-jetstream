@@ -142,7 +142,49 @@ test('published component files have correct view paths', function () {
 
     $content = $this->filesystem->get($this->stubsPath . '/Profile/UpdateProfileInformation.php');
 
-    expect($content)->toContain('livewire.filament-jetstream.profile.update-profile-information');
+    expect($content)->toContain('filament-jetstream::livewire.profile.update-profile-information');
+});
+
+test('all published stubs have correct view paths with namespace prefix', function () {
+    Artisan::call('filament-jetstream:publish-stubs', ['--skip-cache-clear' => true]);
+
+    // Test Profile components
+    $profileFiles = [
+        'UpdateProfileInformation' => 'filament-jetstream::livewire.profile.update-profile-information',
+        'UpdatePassword' => 'filament-jetstream::livewire.profile.update-password',
+        'DeleteAccount' => 'filament-jetstream::livewire.profile.delete-account',
+        'LogoutOtherBrowserSessions' => 'filament-jetstream::livewire.profile.logout-other-browser-sessions',
+    ];
+
+    foreach ($profileFiles as $file => $expectedView) {
+        $content = $this->filesystem->get($this->stubsPath . '/Profile/' . $file . '.php');
+        expect($content)->toContain($expectedView, "Profile/{$file}.php should contain {$expectedView}");
+    }
+
+    // Test Teams components
+    $teamFiles = [
+        'UpdateTeamName' => 'filament-jetstream::livewire.teams.update-team-name',
+        'AddTeamMember' => 'filament-jetstream::livewire.teams.add-team-member',
+        'TeamMembers' => 'filament-jetstream::livewire.teams.team-members',
+        'PendingTeamInvitations' => 'filament-jetstream::livewire.teams.pending-team-invitations',
+        'DeleteTeam' => 'filament-jetstream::livewire.teams.delete-team',
+    ];
+
+    foreach ($teamFiles as $file => $expectedView) {
+        $content = $this->filesystem->get($this->stubsPath . '/Teams/' . $file . '.php');
+        expect($content)->toContain($expectedView, "Teams/{$file}.php should contain {$expectedView}");
+    }
+
+    // Test API Token components
+    $apiFiles = [
+        'CreateApiToken' => 'filament-jetstream::livewire.api-tokens.create-api-token',
+        'ManageApiTokens' => 'filament-jetstream::livewire.api-tokens.manage-api-tokens',
+    ];
+
+    foreach ($apiFiles as $file => $expectedView) {
+        $content = $this->filesystem->get($this->stubsPath . '/ApiTokens/' . $file . '.php');
+        expect($content)->toContain($expectedView, "ApiTokens/{$file}.php should contain {$expectedView}");
+    }
 });
 
 test('publish stubs command clears caches by default', function () {
