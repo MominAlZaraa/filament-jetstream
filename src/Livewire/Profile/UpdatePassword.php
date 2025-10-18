@@ -24,7 +24,7 @@ class UpdatePassword extends BaseLivewireComponent
 
     public function render()
     {
-        return view('filament-jetstream::livewire.profile.update-password');
+        return view($this->getViewName('filament-jetstream::livewire.profile.update-password'));
     }
 
     public function form(Schema $schema): Schema

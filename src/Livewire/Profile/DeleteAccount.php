@@ -84,6 +84,6 @@ class DeleteAccount extends BaseLivewireComponent
 
     public function render(): View
     {
-        return view('filament-jetstream::livewire.profile.delete-account');
+        return view($this->getViewName('filament-jetstream::livewire.profile.delete-account'));
     }
 }

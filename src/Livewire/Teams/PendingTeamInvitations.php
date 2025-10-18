@@ -69,6 +69,6 @@ class PendingTeamInvitations extends BaseLivewireComponent implements Tables\Con
 
     public function render()
     {
-        return view('filament-jetstream::livewire.teams.pending-team-invitations');
+        return view($this->getViewName('filament-jetstream::livewire.teams.pending-team-invitations'));
     }
 }

@@ -125,6 +125,6 @@ class AddTeamMember extends BaseLivewireComponent
 
     public function render()
     {
-        return view('filament-jetstream::livewire.teams.add-team-member');
+        return view($this->getViewName('filament-jetstream::livewire.teams.add-team-member'));
     }
 }

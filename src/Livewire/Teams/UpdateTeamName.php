@@ -62,6 +62,6 @@ class UpdateTeamName extends BaseLivewireComponent
 
     public function render()
     {
-        return view('filament-jetstream::livewire.teams.update-team-name');
+        return view($this->getViewName('filament-jetstream::livewire.teams.update-team-name'));
     }
 }

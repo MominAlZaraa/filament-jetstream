@@ -43,7 +43,7 @@ class DeleteTeam extends BaseLivewireComponent
 
     public function render(): View
     {
-        return view('filament-jetstream::livewire.teams.delete-team');
+        return view($this->getViewName('filament-jetstream::livewire.teams.delete-team'));
     }
 
     public function deleteTeam(Team $team): void

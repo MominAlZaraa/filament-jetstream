@@ -22,6 +22,26 @@ abstract class BaseLivewireComponent extends Component implements HasActions, Ha
     use InteractsWithForms;
     use WithRateLimiting;
 
+    /**
+     * Get the view name for this component, checking for published views first.
+     */
+    protected function getViewName(string $defaultView): string
+    {
+        // Extract the component key from the default view
+        // e.g., "filament-jetstream::livewire.profile.update-profile-information"
+        // becomes "profile.update_profile_information"
+        $key = str_replace(
+            ['filament-jetstream::livewire.', '-'],
+            ['', '_'],
+            $defaultView
+        );
+
+        // Try to discover a published view
+        $publishedView = \Filament\Jetstream\ComponentResolver::discoverPublishedView($key);
+
+        return $publishedView ?? $defaultView;
+    }
+
     public function authUser(): FilamentUser | Model | Authenticatable
     {
         /** @var FilamentUser $user */
