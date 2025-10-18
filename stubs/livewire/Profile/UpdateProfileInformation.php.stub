@@ -1,0 +1,135 @@
+<?php
+
+namespace App\Livewire\FilamentJetstream\Profile;
+
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Actions\Action;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Jetstream\Jetstream;
+use Filament\Jetstream\Livewire\BaseLivewireComponent;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Arr;
+
+/**
+ * Update Profile Information Component
+ *
+ * This component handles updating user profile information including:
+ * - Profile photo (if enabled)
+ * - Name
+ * - Email address
+ *
+ * Customize this file to:
+ * - Add additional profile fields
+ * - Modify validation rules
+ * - Change the form layout
+ * - Add custom actions or business logic
+ */
+class UpdateProfileInformation extends BaseLivewireComponent
+{
+    public ?array $data = [];
+
+    public function mount(): void
+    {
+        // TODO: Customize initial data loading if needed
+        $data = $this->authUser()->only(['name', 'email']);
+
+        $this->form->fill($data);
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        // TODO: Customize form schema
+        // Add or remove fields, change validation rules, modify layout
+        return $schema
+            ->schema([
+                Section::make(__('filament-jetstream::default.update_profile_information.section.title'))
+                    ->aside()
+                    ->description(__('filament-jetstream::default.update_profile_information.section.description'))
+                    ->schema([
+                        FileUpload::make('profile_photo_path')
+                            ->label(__('filament-jetstream::default.form.profile_photo.label'))
+                            ->avatar()
+                            ->image()
+                            ->imageEditor()
+                            ->visibility('public')
+                            ->directory('profile-photos')
+                            ->formatStateUsing(fn () => filament()->auth()->user()?->profile_photo_path)
+                            ->disk(fn (): string => Jetstream::plugin()?->profilePhotoDisk())
+                            ->visible(fn (): bool => Jetstream::plugin()?->managesProfilePhotos()),
+                        TextInput::make('name')
+                            ->label(__('filament-jetstream::default.form.name.label'))
+                            ->string()
+                            ->maxLength(255)
+                            ->required(),
+                        TextInput::make('email')
+                            ->label(__('filament-jetstream::default.form.email.label'))
+                            ->email()
+                            ->required()
+                            ->unique(get_class(Filament::auth()->user()), ignorable: $this->authUser()),
+                        // TODO: Add custom fields here
+                        // Example:
+                        // TextInput::make('phone')
+                        //     ->label('Phone Number')
+                        //     ->tel()
+                        //     ->nullable(),
+                        Actions::make([
+                            Action::make('save')
+                                ->label(__('filament-jetstream::default.action.save.label'))
+                                ->submit('updateProfile'),
+                        ]),
+                    ]),
+            ])
+            ->statePath('data');
+    }
+
+    public function updateProfile(): void
+    {
+        try {
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            $this->sendRateLimitedNotification($exception);
+
+            return;
+        }
+
+        // TODO: Add custom validation logic here
+
+        $data = $this->form->getState();
+
+        $user = $this->authUser();
+
+        $isUpdatingEmail = $data['email'] !== $user->email;
+
+        $isUpdatingPhoto = $data['profile_photo_path'] !== $user->profile_photo_path;
+
+        // TODO: Customize update logic
+        // Handle additional fields or business logic here
+        $user->forceFill(Arr::except($data, ['profile_photo_path']))->save();
+
+        if ($isUpdatingEmail) {
+            $user->forceFill(['email_verified_at' => null]);
+
+            $user->sendEmailVerificationNotification();
+        }
+
+        if ($isUpdatingPhoto) {
+            Arr::get($data, 'profile_photo_path')
+                ? $user->updateProfilePhoto($data['profile_photo_path'])
+                : $user->deleteProfilePhoto();
+        }
+
+        // TODO: Add custom post-update actions
+        // Example: Log activity, send notifications, etc.
+
+        $this->sendNotification();
+    }
+
+    public function render()
+    {
+        return view('livewire.filament-jetstream.profile.update-profile-information');
+    }
+}
