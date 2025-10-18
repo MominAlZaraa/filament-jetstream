@@ -69,6 +69,6 @@ class ManageApiTokens extends BaseLivewireComponent implements HasTable
 
     public function render()
     {
-        return view($this->getViewName('livewire.filament-jetstream.api-tokens.manage-api-tokens'));
+        return view($this->getViewName('filament-jetstream::livewire.api-tokens.manage-api-tokens'));
     }
 }

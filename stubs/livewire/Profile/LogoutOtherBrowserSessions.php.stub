@@ -135,6 +135,6 @@ class LogoutOtherBrowserSessions extends BaseLivewireComponent
 
     public function render(): View
     {
-        return view($this->getViewName('livewire.filament-jetstream.profile.logout-other-browser-sessions'));
+        return view($this->getViewName('filament-jetstream::livewire.profile.logout-other-browser-sessions'));
     }
 }
