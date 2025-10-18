@@ -188,6 +188,166 @@ class User extends Authenticatable
 
 ```
 
+## Customization
+
+### Publishing and Customizing Components
+
+Filament Jetstream allows you to fully customize authentication and profile-related forms by publishing Livewire component stubs.
+
+#### Publishing Stubs
+
+To publish all customizable components:
+
+```bash
+php artisan filament-jetstream:publish-stubs
+```
+
+To publish only specific groups:
+
+```bash
+# Publish only profile components
+php artisan filament-jetstream:publish-stubs --only=profile
+
+# Publish only team components
+php artisan filament-jetstream:publish-stubs --only=teams
+
+# Publish only API token components
+php artisan filament-jetstream:publish-stubs --only=api
+
+# Publish multiple groups
+php artisan filament-jetstream:publish-stubs --only=profile,teams
+```
+
+To overwrite existing published files:
+
+```bash
+php artisan filament-jetstream:publish-stubs --force
+```
+
+#### Published File Structure
+
+Published components will be placed in:
+
+- **Livewire Components**: `app/Livewire/FilamentJetstream/`
+  - `Profile/UpdateProfileInformation.php`
+  - `Profile/UpdatePassword.php`
+  - `Profile/DeleteAccount.php`
+  - `Profile/LogoutOtherBrowserSessions.php`
+  - `Teams/UpdateTeamName.php`
+  - `Teams/AddTeamMember.php`
+  - `Teams/TeamMembers.php`
+  - `Teams/PendingTeamInvitations.php`
+  - `Teams/DeleteTeam.php`
+  - `ApiTokens/CreateApiToken.php`
+  - `ApiTokens/ManageApiTokens.php`
+
+- **Views**: `resources/views/livewire/filament-jetstream/`
+
+#### Auto-Discovery
+
+By default, when you publish components, Filament Jetstream will automatically use your published versions instead of the package defaults. This behavior is controlled in the config file:
+
+```php
+// config/filament-jetstream.php
+'auto_discover' => true, // Set to false to disable auto-discovery
+```
+
+#### Manual Component Overrides
+
+You can also manually specify which components to use in the config file:
+
+```php
+// config/filament-jetstream.php
+'components' => [
+    'profile.update_profile_information' => App\Livewire\Custom\UpdateProfile::class,
+    'profile.update_password' => null, // Use package default
+    // ...
+],
+```
+
+#### Customizing Published Components
+
+Each published component includes TODO comments showing where to add customizations:
+
+```php
+// app/Livewire/FilamentJetstream/Profile/UpdateProfileInformation.php
+
+public function form(Schema $schema): Schema
+{
+    return $schema
+        ->schema([
+            Section::make(...)
+                ->schema([
+                    // Existing fields...
+                    
+                    // TODO: Add custom fields here
+                    // Example:
+                    // TextInput::make('phone')
+                    //     ->label('Phone Number')
+                    //     ->tel()
+                    //     ->nullable(),
+                ]),
+        ]);
+}
+```
+
+#### Configuration
+
+Publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag=filament-jetstream-config
+```
+
+Available configuration options:
+
+```php
+// config/filament-jetstream.php
+return [
+    // Path where published components will be stored
+    'stubs_path' => app_path('Livewire/FilamentJetstream'),
+    
+    // Path where published views will be stored
+    'views_path' => resource_path('views/livewire/filament-jetstream'),
+    
+    // Auto-discover and use published components
+    'auto_discover' => true,
+    
+    // Feature toggles
+    'features' => [
+        'profile_photos' => true,
+        'api_tokens' => false,
+        'teams' => false,
+        'two_factor_authentication' => false,
+    ],
+    
+    // Manual component overrides
+    'components' => [
+        'profile.update_profile_information' => null,
+        // ...
+    ],
+];
+```
+
+#### Example: Adding a Phone Field to Profile
+
+1. Publish the profile stubs:
+   ```bash
+   php artisan filament-jetstream:publish-stubs --only=profile
+   ```
+
+2. Edit `app/Livewire/FilamentJetstream/Profile/UpdateProfileInformation.php`:
+   ```php
+   TextInput::make('phone')
+       ->label('Phone Number')
+       ->tel()
+       ->nullable(),
+   ```
+
+3. Add the phone field to your User model's `$fillable` array.
+
+4. The changes will be automatically used by Filament Jetstream!
+
 ## Testing
 
 ```bash
