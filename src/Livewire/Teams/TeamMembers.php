@@ -165,6 +165,6 @@ class TeamMembers extends BaseLivewireComponent implements Tables\Contracts\HasT
 
     public function render()
     {
-        return view('filament-jetstream::livewire.teams.team-members');
+        return view($this->getViewName('filament-jetstream::livewire.teams.team-members'));
     }
 }

@@ -39,6 +39,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cache Clearing
+    |--------------------------------------------------------------------------
+    |
+    | Control whether to clear various caches when publishing stubs. This
+    | helps ensure published components are discovered immediately.
+    |
+    */
+    'clear_cache_on_publish' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Features
     |--------------------------------------------------------------------------
     |

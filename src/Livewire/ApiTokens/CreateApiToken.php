@@ -108,7 +108,7 @@ class CreateApiToken extends BaseLivewireComponent
 
     public function render()
     {
-        return view('filament-jetstream::livewire.api-tokens.create-api-token');
+        return view($this->getViewName('filament-jetstream::livewire.api-tokens.create-api-token'));
     }
 
     #[On('token-copied')]

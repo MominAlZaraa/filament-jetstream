@@ -4,6 +4,7 @@ namespace Filament\Jetstream;
 
 use Filament\Jetstream\Commands\InstallCommand;
 use Filament\Jetstream\Commands\PublishStubsCommand;
+use Filament\Jetstream\Commands\VerifyStubsCommand;
 use Filament\Jetstream\Livewire\ApiTokens\CreateApiToken;
 use Filament\Jetstream\Livewire\ApiTokens\ManageApiTokens;
 use Filament\Jetstream\Livewire\Profile\DeleteAccount;
@@ -42,6 +43,7 @@ class JetstreamServiceProvider extends PackageServiceProvider
             ->hasCommands([
                 InstallCommand::class,
                 PublishStubsCommand::class,
+                VerifyStubsCommand::class,
             ]);
 
         $this->publishes([
@@ -56,6 +58,7 @@ class JetstreamServiceProvider extends PackageServiceProvider
     public function packageBooted()
     {
         $this->registerLivewireComponents();
+        ComponentResolver::registerViewNamespace();
     }
 
     private function registerLivewireComponents(): void
@@ -125,50 +128,6 @@ class JetstreamServiceProvider extends PackageServiceProvider
      */
     private function resolveComponent(string $key, string $default): string
     {
-        // Check if a custom component is specified in config
-        $customComponent = config("filament-jetstream.components.{$key}");
-
-        if ($customComponent !== null) {
-            return $customComponent;
-        }
-
-        // If auto-discovery is disabled, use the default
-        if (! config('filament-jetstream.auto_discover', true)) {
-            return $default;
-        }
-
-        // Try to discover published component
-        $discoveredComponent = $this->discoverPublishedComponent($key);
-
-        return $discoveredComponent ?? $default;
-    }
-
-    /**
-     * Discover published component in the application.
-     */
-    private function discoverPublishedComponent(string $key): ?string
-    {
-        // Map config keys to class paths
-        $componentMap = [
-            'profile.update_profile_information' => 'Profile\\UpdateProfileInformation',
-            'profile.update_password' => 'Profile\\UpdatePassword',
-            'profile.delete_account' => 'Profile\\DeleteAccount',
-            'profile.logout_other_browser_sessions' => 'Profile\\LogoutOtherBrowserSessions',
-            'teams.update_team_name' => 'Teams\\UpdateTeamName',
-            'teams.add_team_member' => 'Teams\\AddTeamMember',
-            'teams.team_members' => 'Teams\\TeamMembers',
-            'teams.pending_team_invitations' => 'Teams\\PendingTeamInvitations',
-            'teams.delete_team' => 'Teams\\DeleteTeam',
-            'api_tokens.create_api_token' => 'ApiTokens\\CreateApiToken',
-            'api_tokens.manage_api_tokens' => 'ApiTokens\\ManageApiTokens',
-        ];
-
-        if (! isset($componentMap[$key])) {
-            return null;
-        }
-
-        $className = 'App\\Livewire\\FilamentJetstream\\' . $componentMap[$key];
-
-        return class_exists($className) ? $className : null;
+        return ComponentResolver::resolveComponent($key, $default);
     }
 }

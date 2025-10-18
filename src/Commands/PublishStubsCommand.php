@@ -10,7 +10,8 @@ class PublishStubsCommand extends Command
 {
     public $signature = 'filament-jetstream:publish-stubs
                         {--force : Overwrite existing files}
-                        {--only= : Only publish specific groups (profile,teams,api)}';
+                        {--only= : Only publish specific groups (profile,teams,api)}
+                        {--skip-cache-clear : Skip clearing caches after publishing}';
 
     public $description = 'Publish Filament Jetstream Livewire component stubs for customization';
 
@@ -56,9 +57,18 @@ class PublishStubsCommand extends Command
             $this->line("  - {$file}");
         }
 
+        // Clear caches if not skipped
+        if (! $this->option('skip-cache-clear')) {
+            $this->newLine();
+            $this->info('Clearing caches...');
+            $this->clearCaches();
+        }
+
         $this->newLine();
         $this->info('Stubs published successfully!');
         $this->comment('You can now customize the published files in your application.');
+        $this->newLine();
+        $this->comment('Run "php artisan filament-jetstream:verify-stubs" to verify the published components are discoverable.');
 
         return self::SUCCESS;
     }
@@ -273,5 +283,37 @@ class PublishStubsCommand extends Command
         $basePath = config('filament-jetstream.views_path', resource_path('views/livewire/filament-jetstream'));
 
         return $basePath . '/' . $destination;
+    }
+
+    /**
+     * Clear relevant caches after publishing stubs.
+     */
+    protected function clearCaches(): void
+    {
+        // Clear OPcache if available
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+            $this->line('  ✓ OPcache cleared');
+        }
+
+        // Clear Laravel's bootstrap cache
+        if (file_exists(app()->bootstrapPath('cache/packages.php'))) {
+            @unlink(app()->bootstrapPath('cache/packages.php'));
+            $this->line('  ✓ Bootstrap cache cleared');
+        }
+
+        // Clear Laravel's config cache
+        if (file_exists(app()->bootstrapPath('cache/config.php'))) {
+            @unlink(app()->bootstrapPath('cache/config.php'));
+            $this->line('  ✓ Config cache cleared');
+        }
+
+        // Clear view cache
+        $this->call('view:clear');
+        $this->line('  ✓ View cache cleared');
+
+        // Clear ComponentResolver cache
+        \Filament\Jetstream\ComponentResolver::clearCache();
+        $this->line('  ✓ Component resolver cache cleared');
     }
 }
