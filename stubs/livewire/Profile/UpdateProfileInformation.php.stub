@@ -130,6 +130,6 @@ class UpdateProfileInformation extends BaseLivewireComponent
 
     public function render()
     {
-        return view($this->getViewName('livewire.filament-jetstream.profile.update-profile-information'));
+        return view($this->getViewName('filament-jetstream::livewire.profile.update-profile-information'));
     }
 }
