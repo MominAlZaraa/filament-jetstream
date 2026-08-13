@@ -31,3 +31,8 @@
 /testbench.yaml         export-ignore
 /UPGRADING.md           export-ignore
 /CHANGELOG.md           export-ignore
+
+/.claude                export-ignore
+/.cursor                export-ignore
+/AGENTS.md              export-ignore
+/.mcp.json              export-ignore
